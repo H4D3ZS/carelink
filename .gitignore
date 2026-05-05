@@ -1,0 +1,60 @@
+# Dependencies
+apps/mobile/flutter
+apps/web/nextjs
+packages/shared
+packages/api-client
+
+# Build
+*.log
+*.log.gz
+packages/**/*.tgz
+
+# Environment
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.yml
+docker-compose.*.yml
+Dockerfile
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.yamllint.yml
+
+# Documentation
+docs/
+*.md
+README*
+LICENSE
+
+# Testing
+coverage/
+*.lcov
+.nyc_output/
+
+# Temporary
+tmp/
+.temp/
+dist/
+.build/
+.release/
+
+# Logs
+*.pid
+*.pidlock

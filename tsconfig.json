@@ -1,0 +1,16 @@
+{
+  "extends": "tsconfig/strict.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@carelink/*": ["packages/shared/src/*"],
+      "@api/*": ["packages/api-client/src/*"],
+      "@ui/*": ["packages/ui-kit/src/*"]
+    },
+    "jsx": "react-jsx",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["apps/**/*", "packages/**/*"],
+  "exclude": ["node_modules", "**/*.spec.ts"]
+}

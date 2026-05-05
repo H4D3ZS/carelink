@@ -1,0 +1,30 @@
+[log]
+projects = [
+  "apps/*",
+  "packages/*",
+]
+
+[log]
+tasks = {
+  "@/root" => [
+    "dev",
+    "build",
+    "test",
+    "lint",
+    "clean"
+  ],
+}
+
+[log]
+env = {
+  NODE_ENV = "development"
+}
+
+[log]
+outputs = [
+  "logs/**",
+  ".turbo/**"
+]
+
+[log]
+cacheDir = ".turbo"

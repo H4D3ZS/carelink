@@ -1,0 +1,216 @@
+{
+  "name": "carelink-qr",
+  "version": "1.0.0",
+  "description": "CareLink QR: Real-Time Patient Transparency System for Families - Modern Healthcare Solution with Flutter Mobile App, Next.js Web Portal, and Node.js API",
+  "main": "index.js",
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:mobile": "turbo run dev:mobile",
+    "dev:web": "turbo run dev:web",
+    "dev:api": "turbo run dev:api",
+    "build": "turbo run build",
+    "build:mobile": "turbo run build:mobile",
+    "build:web": "turbo run build:web",
+    "build:api": "turbo run build:api",
+    "test": "turbo run test",
+    "test:coverage": "turbo run test:coverage",
+    "test:watch": "turbo run test:watch",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "clean": "turbo run clean",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "prepare": "husky install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/carelink-qr/carelink-qr.git"
+  },
+  "keywords": [
+    "healthcare",
+    "patient-care",
+    "qr-code",
+    "mobile",
+    "flutter",
+    "react",
+    "nextjs",
+    "nodejs",
+    "real-time",
+    "hospital",
+    "families",
+    "transparency",
+    "patient-portal",
+    "medical",
+    "health-tech"
+  ],
+  "author": "CareLink QR Team <support@carelink-qr.example.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/carelink-qr/carelink-qr/issues",
+    "email": "support@carelink-qr.example.com"
+  },
+  "homepage": "https://github.com/carelink-qr/carelink-qr#readme",
+  "collaborators": [
+    {
+      "name": "CareLink QR Team",
+      "email": "support@carelink-qr.example.com",
+      "organization": "CareLink QR"
+    }
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0",
+    "pnpm": ">=8.12.0",
+    "flutter": ">=3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0",
+    "prettier": "^3.1.0",
+    "eslint": "^8.55.0",
+    "eslint-config-prettier": "^9.1.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.2.0",
+    "turbo": "^1.11.0",
+    "commitlint": "^17.0.0",
+    "@commitlint/cli": "^17.7.0",
+    "@commitlint/config-conventional": "^17.7.0",
+    "conventional-changelog-cli": "^4.1.0"
+  },
+  "packageManager": "pnpm@8.12.0",
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.json": [
+      "prettier --write"
+    ],
+    "*.md": [
+      "prettier --write"
+    ]
+  },
+  "conventionalChangelog": {
+    "preset": "angular",
+    "types": [
+      {
+        "type": "feat",
+        "section": "🚀 Features"
+      },
+      {
+        "type": "fix",
+        "section": "🐛 Bug Fixes"
+      },
+      {
+        "type": "docs",
+        "section": "📝 Documentation"
+      },
+      {
+        "type": "style",
+        "section": "🎨 Styles"
+      },
+      {
+        "type": "refactor",
+        "section": "♻️ Code Refactoring"
+      },
+      {
+        "type": "perf",
+        "section": "⚡ Performance"
+      },
+      {
+        "type": "test",
+        "section":"🧪 Tests"
+      },
+      {
+        "type": "build",
+        "section": "🔧 Build System"
+      },
+      {
+        "type": "chore",
+        "section": "🔨 Chores"
+      }
+    ]
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "typescript": ">=4.0.0"
+  },
+  "support": {
+    "issues": "https://github.com/carelink-qr/carelink-qr/issues",
+    "documentation": "https://github.com/carelink-qr/carelink-qr/docs",
+    "security": "security@carelink-qr.example.com",
+    "governance": "https://github.com/carelink-qr/carelink-qr/blob/main/CODE_OF_CONDUCT.md"
+  },
+  "badges": [
+    "https://img.shields.io/badge/Version-1.0.0-blue.svg",
+    "https://img.shields.io/badge/License-MIT-green.svg",
+    "https://img.shields.io/badge/Platform-iOS%20%7C%20Android%20%7C%20Web-green.svg",
+    "https://img.shields.io/badge/React-v18.2.0-pink.svg",
+    "https://img.shields.io/badge/Flutter-v3.x-orange.svg",
+    "https://img.shields.io/badge/Node.js-v18.0.0+-89c343.svg",
+    "https://img.shields.io/badge/Next.js-v14.0.0-white.svg",
+    "https://img.shields.io/badge/Linting-ESLint%20%26%20Prettier-2f3747.svg",
+    "https://img.shields.io/badge/Testing-Unit_%26_E2E-6a0572.svg"
+  ],
+  "features": {
+    "mobile": {
+      "framework": "Flutter 3.x",
+      "stateManagement": "Riverpod",
+      "uiFramework": "Material Design 3"
+    },
+    "web": {
+      "framework": "Next.js 14",
+      "uiLibrary": "shadcn/ui",
+      "css": "Tailwind CSS"
+    },
+    "api": {
+      "runtime": "Node.js 18+",
+      "orm": "TypeORM",
+      "auth": "JWT"
+    }
+  },
+  "security": {
+    "authentication": {
+      "type": "JWT",
+      "expiration": "7d",
+      "refreshToken": "30d"
+    },
+    "authorization": {
+      "model": "RBAC",
+      "roles": ["ADMIN", "DOCTOR", "NURSE", "FAMILY_MEMBER"]
+    },
+    "securityStandards": [
+      "OWASP",
+      "ISO27001",
+      "GDPR",
+      "HIPAA"
+    ]
+  },
+  "ecosystem": {
+    "ciCd": "GitHub Actions",
+    "containerization": "Docker",
+    "monitoring": "Loki + Grafana",
+    "database": "PostgreSQL"
+  },
+  "contributing": {
+    "guidelines": "CONTRIBUTING.md",
+    "codeOfConduct": "CODE_OF_CONDUCT.md",
+    "licenses": "LICENSE",
+    "documentation": "docs/"
+  }
+}
