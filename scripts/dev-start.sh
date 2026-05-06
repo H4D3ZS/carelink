@@ -104,23 +104,20 @@ check_port $FRONTEND_PORT || echo -e "${YELLOW}⚠ Frontend port $FRONTEND_PORT 
 
 echo -e "${GREEN}✅ Port check complete${NC}"
 
-# Install dependencies if needed
-echo -e "${BLUE}📦 Checking dependencies...${NC}"
+# Install/update dependencies
+echo -e "${BLUE}📦 Installing dependencies...${NC}"
 
-if [ ! -d "node_modules" ]; then
-    echo -e "${YELLOW}📦 Installing root dependencies...${NC}"
-    pnpm install
-fi
+# Root dependencies
+echo -e "${YELLOW}📦 Root dependencies...${NC}"
+pnpm install --prefer-offline
 
-if [ ! -d "backend/node_modules" ]; then
-    echo -e "${YELLOW}📦 Installing backend dependencies...${NC}"
-    (cd backend && pnpm install)
-fi
+# Backend dependencies  
+echo -e "${YELLOW}📦 Backend dependencies...${NC}"
+(cd backend && pnpm install --prefer-offline)
 
-if [ ! -d "apps/web/node_modules" ]; then
-    echo -e "${YELLOW}📦 Installing web dependencies...${NC}"
-    (cd apps/web && pnpm install)
-fi
+# Web dependencies
+echo -e "${YELLOW}📦 Web dependencies...${NC}"
+(cd apps/web && pnpm install --prefer-offline)
 
 echo -e "${GREEN}✅ Dependencies ready${NC}"
 
