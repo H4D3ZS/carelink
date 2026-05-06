@@ -109,15 +109,15 @@ echo -e "${BLUE}📦 Installing dependencies...${NC}"
 
 # Root dependencies
 echo -e "${YELLOW}📦 Root dependencies...${NC}"
-pnpm install --prefer-offline
+pnpm install
 
 # Backend dependencies  
 echo -e "${YELLOW}📦 Backend dependencies...${NC}"
-(cd backend && pnpm install --prefer-offline)
+(cd backend && pnpm install)
 
 # Web dependencies
 echo -e "${YELLOW}📦 Web dependencies...${NC}"
-(cd apps/web && pnpm install --prefer-offline)
+(cd apps/web && pnpm install)
 
 echo -e "${GREEN}✅ Dependencies ready${NC}"
 
