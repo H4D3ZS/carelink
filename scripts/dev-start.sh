@@ -12,6 +12,7 @@ echo "=================================================="
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+RED='\033[0;31m'
 NC='\033[0m' # No Color
 
 # Configuration
@@ -28,7 +29,7 @@ echo -e "${BLUE}📁 Project Root: ${PROJECT_ROOT}${NC}"
 # Function to check if port is available
 check_port() {
     local port=$1
-    if netstat -ano | grep -q ":${port}"; then
+    if netstat -ano 2>/dev/null | grep -q ":${port}"; then
         echo -e "${YELLOW}⚠ Port $port is already in use${NC}"
         return 1
     else
@@ -58,18 +59,30 @@ wait_for_service() {
     return 0
 }
 
+# Function to check if dependency is installed
+check_dependency() {
+    local module=$1
+    local package=$2
+    
+    if [ -d "${module}/node_modules/${package}" ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 # Check prerequisites
 echo -e "${BLUE}📋 Checking prerequisites...${NC}"
 
 # Check Node.js
 if ! command -v node &> /dev/null; then
-    echo -e "${YELLOW}❌ Node.js is not installed${NC}"
+    echo -e "${RED}❌ Node.js is not installed${NC}"
     exit 1
 fi
 
 # Check pnpm
 if ! command -v pnpm &> /dev/null; then
-    echo -e "${YELLOW}❌ pnpm is not installed${NC}"
+    echo -e "${RED}❌ pnpm is not installed${NC}"
     exit 1
 fi
 
@@ -104,6 +117,26 @@ check_port $FRONTEND_PORT || echo -e "${YELLOW}⚠ Frontend port $FRONTEND_PORT 
 
 echo -e "${GREEN}✅ Port check complete${NC}"
 
+# Check if sqlite3 is installed - if not, we need to reset the lockfile
+echo -e "${BLUE}🔍 Checking for stale lockfiles...${NC}"
+
+if ! check_dependency "backend" "sqlite3"; then
+    echo -e "${YELLOW}⚠ sqlite3 not found in backend dependencies${NC}"
+    echo -e "${YELLOW}📦 Stale lockfile detected. Regenerating...${NC}"
+    
+    # Delete stale lockfiles
+    rm -f backend/pnpm-lock.yaml 2>/dev/null
+    rm -f apps/web/pnpm-lock.yaml 2>/dev/null
+    rm -f pnpm-lock.yaml 2>/dev/null
+    
+    # Clean up node_modules to force fresh install
+    rm -rf backend/node_modules 2>/dev/null
+    rm -rf apps/web/node_modules 2>/dev/null
+    rm -rf node_modules 2>/dev/null
+    
+    echo -e "${GREEN}✅ Stale dependencies cleaned${NC}"
+fi
+
 # Install/update dependencies
 echo -e "${BLUE}📦 Installing dependencies...${NC}"
 
@@ -115,11 +148,18 @@ pnpm install
 echo -e "${YELLOW}📦 Backend dependencies...${NC}"
 (cd backend && pnpm install)
 
+# Verify sqlite3 was installed
+if ! check_dependency "backend" "sqlite3"; then
+    echo -e "${RED}❌ ERROR: sqlite3 still not installed after pnpm install${NC}"
+    echo -e "${RED}   Please check backend/package.json contains sqlite3${NC}"
+    exit 1
+fi
+
 # Web dependencies
 echo -e "${YELLOW}📦 Web dependencies...${NC}"
 (cd apps/web && pnpm install)
 
-echo -e "${GREEN}✅ Dependencies ready${NC}"
+echo -e "${GREEN}✅ All dependencies installed successfully${NC}"
 
 # Start services
 echo ""
