@@ -1,8 +1,21 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "CareLink QR - Patient Transparency System",
-  description: "Real-time patient transparency system for families and healthcare providers",
+  title: "CareLink QR - Real-Time Patient Transparency System",
+  description: "Connect families with real-time patient updates through secure QR codes. Stay informed about your loved one's care journey.",
+  keywords: "healthcare, patient care, QR code, family portal, hospital, transparency",
+  authors: [{ name: "CareLink QR Team" }],
+  openGraph: {
+    title: "CareLink QR - Patient Transparency System",
+    description: "Real-time patient updates for families and healthcare providers",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -12,7 +25,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className={inter.className}>
+        <div className="min-h-screen flex flex-col">
+          <Navbar />
+          <main className="flex-grow">
+            {children}
+          </main>
+          <Footer />
+        </div>
+      </body>
     </html>
   );
 }
