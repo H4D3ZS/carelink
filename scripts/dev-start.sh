@@ -19,10 +19,16 @@ FRONTEND_PORT=3000
 BACKEND_PORT=3001
 MOBILE_PORT=8080
 
+# Get script directory and project root
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+echo -e "${BLUE}📁 Project Root: ${PROJECT_ROOT}${NC}"
+
 # Function to check if port is available
 check_port() {
     local port=$1
-    if lsof -Pi :$port -sTCP:LISTEN -t >/dev/null 2>&1; then
+    if netstat -ano | grep -q ":${port}"; then
         echo -e "${YELLOW}⚠ Port $port is already in use${NC}"
         return 1
     else
@@ -67,12 +73,11 @@ if ! command -v pnpm &> /dev/null; then
     exit 1
 fi
 
-# Check Flutter
-if ! command -v flutter &> /dev/null; then
-    echo -e "${YELLOW}⚠ Flutter is not installed (optional for mobile)${NC}"
-fi
-
 echo -e "${GREEN}✅ Prerequisites check passed${NC}"
+
+# Navigate to project root
+cd "${PROJECT_ROOT}"
+echo -e "${BLUE}📁 Working in: $(pwd)${NC}"
 
 # Check environment files
 echo -e "${BLUE}🔧 Checking environment configuration...${NC}"
@@ -94,7 +99,6 @@ fi
 
 # Check port availability
 echo -e "${BLUE}🔍 Checking port availability...${NC}"
-
 check_port $BACKEND_PORT || echo -e "${YELLOW}⚠ Backend port $BACKEND_PORT may be in use${NC}"
 check_port $FRONTEND_PORT || echo -e "${YELLOW}⚠ Frontend port $FRONTEND_PORT may be in use${NC}"
 
@@ -110,12 +114,12 @@ fi
 
 if [ ! -d "backend/node_modules" ]; then
     echo -e "${YELLOW}📦 Installing backend dependencies...${NC}"
-    cd backend && pnpm install && cd ..
+    (cd backend && pnpm install)
 fi
 
 if [ ! -d "apps/web/node_modules" ]; then
     echo -e "${YELLOW}📦 Installing web dependencies...${NC}"
-    cd apps/web && pnpm install && cd ../..
+    (cd apps/web && pnpm install)
 fi
 
 echo -e "${GREEN}✅ Dependencies ready${NC}"
@@ -125,112 +129,56 @@ echo ""
 echo -e "${GREEN}🚀 Starting services...${NC}"
 echo "=================================================="
 
-# Function to start backend
-start_backend() {
-    echo -e "${BLUE}🔧 Starting Backend API (Node.js)...${NC}"
-    cd backend
-    
-    # Check if already running
-    if lsof -Pi :$BACKEND_PORT -sTCP:LISTEN -t >/dev/null 2>&1; then
-        echo -e "${YELLOW}⚠ Backend already running on port $BACKEND_PORT${NC}"
-        return 0
-    fi
-    
-    # Start backend in background
-    pnpm dev &
-    BACKEND_PID=$!
-    cd ..
-    
-    # Wait for backend to be ready
-    if wait_for_service $BACKEND_PORT "Backend API"; then
-        echo -e "${GREEN}✅ Backend API running at http://localhost:$BACKEND_PORT${NC}"
-        return 0
-    else
-        echo -e "${YELLOW}❌ Failed to start Backend API${NC}"
-        return 1
-    fi
-}
+# Start Backend API
+echo -e "${BLUE}🔧 Starting Backend API (Node.js)...${NC}"
+(cd backend && pnpm dev &) 
+BACKEND_PID=$!
 
-# Function to start frontend
-start_frontend() {
-    echo -e "${BLUE}🌐 Starting Frontend (Next.js)...${NC}"
-    cd apps/web
-    
-    # Check if already running
-    if lsof -Pi :$FRONTEND_PORT -sTCP:LISTEN -t >/dev/null 2>&1; then
-        echo -e "${YELLOW}⚠ Frontend already running on port $FRONTEND_PORT${NC}"
-        return 0
-    fi
-    
-    # Start frontend in background
-    pnpm dev &
-    FRONTEND_PID=$!
-    cd ../..
-    
-    # Wait for frontend to be ready
-    if wait_for_service $FRONTEND_PORT "Frontend"; then
-        echo -e "${GREEN}✅ Frontend running at http://localhost:$FRONTEND_PORT${NC}"
-        return 0
-    else
-        echo -e "${YELLOW}❌ Failed to start Frontend${NC}"
-        return 1
-    fi
-}
+# Wait a bit for backend to initialize
+sleep 3
 
-# Function to start mobile (optional)
-start_mobile() {
-    echo -e "${BLUE}📱 Starting Mobile App (Flutter)...${NC}"
-    
-    if ! command -v flutter &> /dev/null; then
-        echo -e "${YELLOW}⚠ Flutter not installed, skipping mobile app${NC}"
-        return 0
-    fi
-    
-    cd apps/mobile
-    
-    # Check if Flutter dependencies are installed
-    if [ ! -d ".dart_tool" ]; then
-        echo -e "${YELLOW}📦 Installing Flutter dependencies...${NC}"
-        flutter pub get
-    fi
-    
-    # Start Flutter in debug mode
-    flutter run --debug &
-    MOBILE_PID=$!
-    cd ../..
-    
-    echo -e "${GREEN}✅ Mobile app started (check device/emulator)${NC}"
-    return 0
-}
+# Check if backend started
+if ! wait_for_service $BACKEND_PORT "Backend API"; then
+    echo -e "${YELLOW}⚠ Backend may have failed to start. Check logs.${NC}"
+fi
 
-# Start all services
-start_backend
-start_frontend
+# Start Frontend
+echo -e "${BLUE}🌐 Starting Frontend (Next.js)...${NC}"
+(cd apps/web && pnpm dev &)
+FRONTEND_PID=$!
 
-# Ask about mobile app
-echo ""
-read -p "📱 Start mobile app (Flutter)? (y/N): " start_mobile_choice
-if [[ $start_mobile_choice =~ ^[Yy]$ ]]; then
-    start_mobile
+# Wait a bit for frontend to initialize
+sleep 3
+
+# Check if frontend started
+if ! wait_for_service $FRONTEND_PORT "Frontend"; then
+    echo -e "${YELLOW}⚠ Frontend may have failed to start. Check logs.${NC}"
 fi
 
 echo ""
 echo -e "${GREEN}==================================================${NC}"
-echo -e "${GREEN}🎉 All services started successfully!${NC}"
+echo -e "${GREEN}🎉 Development services started!${NC}"
 echo -e "${GREEN}==================================================${NC}"
 echo ""
 echo -e "📍 Access Points:"
 echo -e "  🔧 Backend API:     ${BLUE}http://localhost:$BACKEND_PORT${NC}"
 echo -e "  🌐 Frontend:        ${BLUE}http://localhost:$FRONTEND_PORT${NC}"
-echo -e "  📱 Mobile:          ${BLUE}Check your device/emulator${NC}"
 echo ""
 echo -e "📋 Available Commands:"
-echo -e "  📝 View logs:       ${YELLOW}tail -f logs/*.log${NC}"
-echo -e "  🛑 Stop services:   ${YELLOW}./scripts/dev-stop.sh${NC}"
-echo -e "  🔄 Restart:        ${YELLOW}./scripts/dev-start.sh${NC}"
+echo -e "  📝 View backend logs:   ${YELLOW}tail -f backend/logs/*.log${NC}"
+echo -e "  📝 View frontend logs:  ${YELLOW}tail -f apps/web/logs/*.log${NC}"
+echo -e "  🛑 Stop services:       ${YELLOW}./scripts/dev-stop.sh${NC}"
+echo -e "  🔄 Restart:            ${YELLOW}./scripts/dev-start.sh${NC}"
 echo ""
-echo -e "🚀 Happy coding!${NC}"
+echo -e "${YELLOW}⚠ Note: Services are running in background.${NC}"
+echo -e "${YELLOW}  Use 'jobs' to see background jobs or 'fg' to bring to foreground.${NC}"
 echo ""
 
 # Keep script running to maintain background processes
+echo -e "${GREEN}Press Ctrl+C to stop this script (services will continue running)${NC}"
+echo -e "${GREEN}Run ./scripts/dev-stop.sh to stop all services${NC}"
+echo ""
+
+# Wait for user interrupt
+trap 'echo -e "\n${YELLOW}Script interrupted. Services are still running.${NC}"; exit 0' INT
 wait
