@@ -54,6 +54,11 @@ tmp/
 dist/
 .build/
 .release/
+apps/web/.next/
+backend/carelink-dev.db
+node_modules/
+apps/web/node_modules/
+backend/node_modules/
 
 # Logs
 *.pid

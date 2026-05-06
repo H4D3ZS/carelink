@@ -1,18 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Avatar, AvatarFallback } from "@/components/ui/Avatar";
-import {
-  Heart,
-  Bell,
-  QrCode,
-  ChevronRight,
-  Phone,
-} from "lucide-react";
+import { Heart, Bell, QrCode, ChevronRight, Phone } from "lucide-react";
 import { patientApi, Patient, Task, Note, getToken } from "@/lib/api";
 
 const getStatusColor = (status: string) => {
@@ -33,6 +28,7 @@ const getStatusColor = (status: string) => {
 };
 
 export default function FamilyPortalPage() {
+  const router = useRouter();
   const [patient, setPatient] = useState<Patient | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
@@ -64,10 +60,11 @@ export default function FamilyPortalPage() {
     if (!getToken()) {
       setError("Please login first.");
       setLoading(false);
+      router.replace("/login?next=/family-portal");
       return;
     }
     load();
-  }, []);
+  }, [router]);
 
   return (
     <div className="min-h-screen bg-slate-50">

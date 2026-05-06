@@ -1,20 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Avatar, AvatarFallback } from "@/components/ui/Avatar";
 import { Input } from "@/components/ui/Input";
-import {
-  Heart,
-  Bell,
-  QrCode,
-  Search,
-  Plus,
-  Settings,
-} from "lucide-react";
+import { Heart, Bell, QrCode, Search, Settings } from "lucide-react";
 import { patientApi, Patient, Task, Note, getToken } from "@/lib/api";
 
 const getStatusColor = (status: string) => {
@@ -35,6 +29,7 @@ const getStatusColor = (status: string) => {
 };
 
 export default function AdminDashboardPage() {
+  const router = useRouter();
   const [patients, setPatients] = useState<Patient[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -61,10 +56,7 @@ export default function AdminDashboardPage() {
   const loadPatientData = async (id: string) => {
     setError(null);
     try {
-      const [ts, ns] = await Promise.all([
-        patientApi.listTasks(id),
-        patientApi.listNotes(id),
-      ]);
+      const [ts, ns] = await Promise.all([patientApi.listTasks(id), patientApi.listNotes(id)]);
       setTasks(ts);
       setNotes(ns);
     } catch (e: any) {
@@ -92,10 +84,11 @@ export default function AdminDashboardPage() {
     if (!getToken()) {
       setError("Please login as staff/admin first.");
       setLoading(false);
+      router.replace("/login?next=/admin");
       return;
     }
     load();
-  }, []);
+  }, [router]);
 
   const onSelectPatient = async (id: string) => {
     setSelectedId(id);
@@ -127,7 +120,6 @@ export default function AdminDashboardPage() {
     setConsentToggleLoading(true);
     try {
       await patientApi.setConsent(selectedPatient.id, !selectedPatient.consentEnabled);
-      // refresh patient list to get updated consent
       await load();
     } catch (e: any) {
       setError(e?.message || "Consent update failed");
