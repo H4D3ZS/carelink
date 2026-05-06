@@ -21,10 +21,13 @@ import {
   ArrowRight,
   Github,
 } from "lucide-react";
+import { authApi, setToken } from "@/lib/api";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -33,10 +36,17 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // TODO: Implement actual authentication
-    setTimeout(() => {
+    setSuccess(null);
+    setError(null);
+    try {
+      const res = await authApi.login(formData.email, formData.password);
+      setToken(res.token);
+      setSuccess("Signed in.");
+    } catch (err: any) {
+      setError(err?.message || "Login failed");
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -134,6 +144,13 @@ export default function LoginPage() {
                 )}
               </Button>
             </form>
+
+            {success && (
+              <p className="mt-4 text-sm text-emerald-600 text-center">{success}</p>
+            )}
+            {error && (
+              <p className="mt-2 text-sm text-red-600 text-center">{error}</p>
+            )}
 
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">

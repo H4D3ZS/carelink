@@ -37,6 +37,42 @@ check_port() {
     fi
 }
 
+# Function to force kill a port (cross-platform)
+kill_port() {
+    local port=$1
+    echo -e "${YELLOW}🔪 Forcing port $port to free up...${NC}"
+
+    if command -v lsof &>/dev/null; then
+        local pid
+        pid=$(lsof -ti:$port 2>/dev/null || true)
+        if [ -n "$pid" ]; then
+            kill -9 "$pid" 2>/dev/null || true
+            echo -e "${GREEN}✅ Killed PID $pid on port $port${NC}"
+        fi
+    elif command -v netstat &>/dev/null; then
+        local pid
+        pid=$(netstat -ano 2>/dev/null | grep ":${port} " | awk '{print $5}' | tr -d '\r' | head -1)
+        if [ -n "$pid" ] && [ "$pid" != "0" ]; then
+            taskkill //F //PID "$pid" 2>/dev/null || true
+            echo -e "${GREEN}✅ Killed PID $pid on port $port${NC}"
+        fi
+    fi
+}
+
+# Kill common node processes (aggressive)
+kill_node_procs() {
+    echo -e "${YELLOW}🔪 Killing node-related processes (node, next, ts-node-dev)...${NC}"
+    if command -v pkill &>/dev/null; then
+        pkill -f "ts-node-dev" 2>/dev/null || true
+        pkill -f "next dev" 2>/dev/null || true
+        pkill -f "node" 2>/dev/null || true
+    elif command -v taskkill &>/dev/null; then
+        taskkill //F //IM "node.exe" 2>/dev/null || true
+        taskkill //F //IM "Next.exe" 2>/dev/null || true
+        taskkill //F //IM "ts-node-dev.exe" 2>/dev/null || true
+    fi
+}
+
 # Function to wait for service
 wait_for_service() {
     local port=$1
@@ -114,6 +150,13 @@ fi
 echo -e "${BLUE}🔍 Checking port availability...${NC}"
 check_port $BACKEND_PORT || echo -e "${YELLOW}⚠ Backend port $BACKEND_PORT may be in use${NC}"
 check_port $FRONTEND_PORT || echo -e "${YELLOW}⚠ Frontend port $FRONTEND_PORT may be in use${NC}"
+
+# Force kill if ports are occupied (per user request)
+echo -e "${BLUE}🔪 Ensuring required ports are free...${NC}"
+kill_node_procs
+kill_port $FRONTEND_PORT
+kill_port $BACKEND_PORT
+kill_port $MOBILE_PORT
 
 echo -e "${GREEN}✅ Port check complete${NC}"
 

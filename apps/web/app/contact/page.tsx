@@ -60,14 +60,29 @@ const inquiryTypes = [
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    organization: "",
+    inquiry: "",
+    message: "",
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate form submission
     setTimeout(() => {
       setIsLoading(false);
       setSubmitted(true);
+      setFormData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        organization: "",
+        inquiry: "",
+        message: "",
+      });
     }, 1500);
   };
 
@@ -161,11 +176,23 @@ export default function ContactPage() {
                 <div className="grid sm:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="firstName">First Name</Label>
-                    <Input id="firstName" placeholder="John" required />
+                    <Input
+                      id="firstName"
+                      placeholder="John"
+                      required
+                      value={formData.firstName}
+                      onChange={(e) => setFormData((p) => ({ ...p, firstName: e.target.value }))}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="lastName">Last Name</Label>
-                    <Input id="lastName" placeholder="Doe" required />
+                    <Input
+                      id="lastName"
+                      placeholder="Doe"
+                      required
+                      value={formData.lastName}
+                      onChange={(e) => setFormData((p) => ({ ...p, lastName: e.target.value }))}
+                    />
                   </div>
                 </div>
 
@@ -176,6 +203,8 @@ export default function ContactPage() {
                     type="email"
                     placeholder="john@hospital.com"
                     required
+                    value={formData.email}
+                    onChange={(e) => setFormData((p) => ({ ...p, email: e.target.value }))}
                   />
                 </div>
 
@@ -184,12 +213,17 @@ export default function ContactPage() {
                   <Input
                     id="organization"
                     placeholder="St. Mary's Hospital"
+                    value={formData.organization}
+                    onChange={(e) => setFormData((p) => ({ ...p, organization: e.target.value }))}
                   />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="inquiry">Inquiry Type</Label>
-                  <Select>
+                  <Select
+                    value={formData.inquiry}
+                    onValueChange={(v) => setFormData((p) => ({ ...p, inquiry: v }))}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select inquiry type" />
                     </SelectTrigger>
@@ -211,6 +245,8 @@ export default function ContactPage() {
                     className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm ring-offset-white placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     placeholder="Tell us about your needs..."
                     required
+                    value={formData.message}
+                    onChange={(e) => setFormData((p) => ({ ...p, message: e.target.value }))}
                   />
                 </div>
 

@@ -1,5 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { DemoModule } from './demo/demo.module';
+import { StoreModule } from './store/store.module';
+import { AuthModule } from './auth/auth.module';
+import { PatientController } from './patient/patient.controller';
 
 // Determine database configuration based on environment
 const isDevelopment = process.env.NODE_ENV !== 'production';
@@ -7,6 +11,9 @@ const useSQLite = process.env.USE_SQLITE === 'true' || (isDevelopment && !proces
 
 @Module({
   imports: [
+    StoreModule,
+    AuthModule,
+    DemoModule,
     TypeOrmModule.forRoot(
       useSQLite
         ? {
@@ -28,7 +35,7 @@ const useSQLite = process.env.USE_SQLITE === 'true' || (isDevelopment && !proces
           },
     ),
   ],
-  controllers: [],
+  controllers: [PatientController],
   providers: [],
 })
 export class AppModule {}

@@ -30,6 +30,7 @@ import {
   ArrowRight,
   CheckCircle2,
 } from "lucide-react";
+import { authApi, setToken } from "@/lib/api";
 
 const userTypes = [
   { value: "healthcare_provider", label: "Healthcare Provider" },
@@ -41,6 +42,8 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(1);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -52,15 +55,28 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSuccess(null);
+    setError(null);
     if (step === 1) {
       setStep(2);
       return;
     }
     setIsLoading(true);
-    // TODO: Implement actual registration
-    setTimeout(() => {
+    try {
+      const role =
+        formData.userType === "healthcare_provider"
+          ? "staff"
+          : formData.userType === "administrator"
+          ? "admin"
+          : "family";
+      const res = await authApi.register(formData.email, formData.password, role as any);
+      setToken(res.token);
+      setSuccess("Account created.");
+    } catch (err: any) {
+      setError(err?.message || "Registration failed");
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -298,6 +314,17 @@ export default function RegisterPage() {
             </form>
           </CardContent>
         </Card>
+
+        {success && (
+          <p className="mt-4 text-center text-sm text-emerald-600">
+            {success}
+          </p>
+        )}
+        {error && (
+          <p className="mt-2 text-center text-sm text-red-600">
+            {error}
+          </p>
+        )}
 
         <p className="mt-6 text-center text-sm text-slate-600">
           Already have an account?{" "}
