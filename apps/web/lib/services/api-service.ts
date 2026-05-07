@@ -226,11 +226,6 @@ export interface SortConfig {
   direction: 'ASC' | 'DESC';
 }
 
-export interface SortConfig {
-  sortBy: keyof unknown;
-  sortOrder: 'ASC' | 'DESC';
-}
-
 // Utility Functions
 export function formatDate(date: Date | string, format: string = 'full'): string {
   const d = typeof date === 'string' ? new Date(date) : date;
@@ -272,26 +267,4 @@ export function generatePaginationNumbers(
   }
 
   return numbers;
-}
-
-// Middleware Support
-export async function getServerSideProps(
-  context: {
-    params: Record<string, string>;
-    query: Record<string, string>;
-    req: NextApiRequest;
-    res: NextApiResponse;
-  },
-): Promise<Props> {
-  const { params, query, req, res } = context;
-
-  // Fetch initial props data
-  const props = await APIService.getInitialProps(
-    req,
-    res,
-    params,
-    query,
-  );
-
-  return { props };
 }
