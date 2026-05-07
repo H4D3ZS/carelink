@@ -90,25 +90,25 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/20">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center py-8 px-4 sm:py-12 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/20">
+      <div className="w-full max-w-[420px] mx-auto">
         {/* Logo */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6 sm:mb-8">
           <Link href="/" className="inline-flex items-center gap-2 group">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center shadow-lg group-hover:shadow-sky-500/30 transition-shadow">
-              <Heart className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center shadow-lg group-hover:shadow-sky-500/30 transition-shadow">
+              <Heart className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
-            <span className="font-bold text-2xl text-slate-900">
+            <span className="font-bold text-xl sm:text-2xl text-slate-900">
               CareLink<span className="text-sky-600">QR</span>
             </span>
           </Link>
-          <p className="mt-2 text-slate-600">Create your account</p>
+          <p className="mt-2 text-sm sm:text-base text-slate-600">Create your account</p>
         </div>
 
         {/* Progress Steps */}
-        <div className="flex items-center justify-center gap-4 mb-8">
+        <div className="flex items-center justify-center gap-3 sm:gap-4 mb-6 sm:mb-8">
           <div
-            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
+            className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold transition-colors ${
               step >= 1
                 ? "bg-sky-600 text-white"
                 : "bg-slate-200 text-slate-500"
@@ -117,12 +117,12 @@ export default function RegisterPage() {
             1
           </div>
           <div
-            className={`w-16 h-1 rounded ${
+            className={`w-12 sm:w-16 h-1 rounded transition-colors ${
               step >= 2 ? "bg-sky-600" : "bg-slate-200"
             }`}
           />
           <div
-            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
+            className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold transition-colors ${
               step >= 2
                 ? "bg-sky-600 text-white"
                 : "bg-slate-200 text-slate-500"
@@ -132,30 +132,31 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl text-center">
+        <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm">
+          <CardHeader className="space-y-1 pb-4 sm:pb-6">
+            <CardTitle className="text-xl sm:text-2xl text-center">
               {step === 1 ? "Personal Information" : "Account Details"}
             </CardTitle>
-            <CardDescription className="text-center">
+            <CardDescription className="text-center text-sm">
               {step === 1
                 ? "Tell us about yourself"
                 : "Set up your account credentials"}
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             <form onSubmit={handleSubmit} className="space-y-4">
               {step === 1 ? (
                 <>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="firstName">First Name</Label>
+                  {/* Name fields - stack on mobile, side by side on larger screens */}
+                  <div className="flex flex-col sm:grid sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div className="space-y-1.5 sm:space-y-2">
+                      <Label htmlFor="firstName" className="text-sm">First Name</Label>
                       <div className="relative">
-                        <User className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                         <Input
                           id="firstName"
                           placeholder="John"
-                          className="pl-10"
+                          className="pl-10 h-11"
                           value={formData.firstName}
                           onChange={(e) =>
                             setFormData({ ...formData, firstName: e.target.value })
@@ -164,11 +165,12 @@ export default function RegisterPage() {
                         />
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="lastName">Last Name</Label>
+                    <div className="space-y-1.5 sm:space-y-2">
+                      <Label htmlFor="lastName" className="text-sm">Last Name</Label>
                       <Input
                         id="lastName"
                         placeholder="Doe"
+                        className="h-11"
                         value={formData.lastName}
                         onChange={(e) =>
                           setFormData({ ...formData, lastName: e.target.value })
@@ -178,13 +180,14 @@ export default function RegisterPage() {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="userType">I am a</Label>
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <Label htmlFor="userType" className="text-sm">I am a</Label>
                     <Select
                       value={formData.userType}
                       onValueChange={(value) =>
                         setFormData({ ...formData, userType: value })
                       }
+                      placeholder="Select your role"
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select your role" />
@@ -200,14 +203,14 @@ export default function RegisterPage() {
                   </div>
 
                   {formData.userType === "healthcare_provider" && (
-                    <div className="space-y-2">
-                      <Label htmlFor="hospitalName">Hospital/Organization</Label>
+                    <div className="space-y-1.5 sm:space-y-2">
+                      <Label htmlFor="hospitalName" className="text-sm">Hospital/Organization</Label>
                       <div className="relative">
-                        <Building2 className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                        <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                         <Input
                           id="hospitalName"
                           placeholder="St. Mary's Hospital"
-                          className="pl-10"
+                          className="pl-10 h-11"
                           value={formData.hospitalName}
                           onChange={(e) =>
                             setFormData({ ...formData, hospitalName: e.target.value })
@@ -219,15 +222,15 @@ export default function RegisterPage() {
                 </>
               ) : (
                 <>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <Label htmlFor="email" className="text-sm">Email</Label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                       <Input
                         id="email"
                         type="email"
                         placeholder="name@hospital.com"
-                        className="pl-10"
+                        className="pl-10 h-11"
                         value={formData.email}
                         onChange={(e) =>
                           setFormData({ ...formData, email: e.target.value })
@@ -237,15 +240,15 @@ export default function RegisterPage() {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <Label htmlFor="password" className="text-sm">Password</Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                       <Input
                         id="password"
                         type={showPassword ? "text" : "password"}
                         placeholder="••••••••"
-                        className="pl-10 pr-10"
+                        className="pl-10 pr-10 h-11"
                         value={formData.password}
                         onChange={(e) =>
                           setFormData({ ...formData, password: e.target.value })
@@ -255,7 +258,7 @@ export default function RegisterPage() {
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                       >
                         {showPassword ? (
                           <EyeOff className="h-4 w-4" />
@@ -265,18 +268,18 @@ export default function RegisterPage() {
                       </button>
                     </div>
                     <p className="text-xs text-slate-500">
-                      Must be at least 8 characters with a number and special character
+                      Must be at least 8 characters
                     </p>
                   </div>
 
-                  <div className="flex items-start gap-2">
+                  <div className="flex items-start gap-2 pt-1">
                     <input
                       type="checkbox"
                       id="terms"
-                      className="mt-1 rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+                      className="mt-0.5 rounded border-slate-300 text-sky-600 focus:ring-sky-500"
                       required
                     />
-                    <Label htmlFor="terms" className="text-sm font-normal leading-tight">
+                    <Label htmlFor="terms" className="text-xs sm:text-sm font-normal leading-tight">
                       I agree to the{" "}
                       <Link href="/terms" className="text-sky-600 hover:underline">
                         Terms of Service
@@ -290,12 +293,12 @@ export default function RegisterPage() {
                 </>
               )}
 
-              <div className="flex gap-3">
+              <div className="flex gap-3 pt-2">
                 {step === 2 && (
                   <Button
                     type="button"
                     variant="outline"
-                    className="flex-1"
+                    className="flex-1 h-11"
                     onClick={() => setStep(1)}
                   >
                     Back
@@ -303,7 +306,7 @@ export default function RegisterPage() {
                 )}
                 <Button
                   type="submit"
-                  className="flex-1 gap-2"
+                  className="flex-1 gap-2 h-11"
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -331,12 +334,12 @@ export default function RegisterPage() {
           </p>
         )}
         {error && (
-          <p className="mt-2 text-center text-sm text-red-600">
+          <p className="mt-3 text-center text-sm text-red-600">
             {error}
           </p>
         )}
 
-        <p className="mt-6 text-center text-sm text-slate-600">
+        <p className="mt-5 sm:mt-6 text-center text-sm text-slate-600">
           Already have an account?{" "}
           <Link
             href="/login"
