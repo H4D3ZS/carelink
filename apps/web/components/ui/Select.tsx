@@ -24,12 +24,28 @@ interface SelectProps
   onValueChange?: (value: string) => void;
 }
 
+// Recursively find all SelectItem children
+const findSelectItems = (children: React.ReactNode): React.ReactElement<SelectItemProps>[] => {
+  const items: React.ReactElement<SelectItemProps>[] = [];
+  
+  React.Children.forEach(children, (child) => {
+    if (!React.isValidElement(child)) return;
+    
+    if (child.type === SelectItem || (child.type as any)?.displayName === "SelectItem") {
+      items.push(child as React.ReactElement<SelectItemProps>);
+    } else if (child.props?.children) {
+      // Recursively search in child children
+      items.push(...findSelectItems(child.props.children));
+    }
+  });
+  
+  return items;
+};
+
 const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
   ({ className, onValueChange, children, defaultValue, value, ...props }, ref) => {
-    // Flatten children to extract SelectItem nodes as <option>
-    const options = React.Children.toArray(children).filter(
-      (child: any) => child?.type?.displayName === "SelectItem"
-    ) as React.ReactElement<SelectItemProps>[];
+    // Recursively extract SelectItem nodes as <option>
+    const options = findSelectItems(children);
 
     return (
       <select
@@ -43,6 +59,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
         onChange={(e) => onValueChange?.(e.target.value)}
         {...props}
       >
+        <option value="" disabled>Select your role</option>
         {options}
       </select>
     );
