@@ -30,7 +30,9 @@ import {
   ArrowRight,
   CheckCircle2,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { authApi, setToken } from "@/lib/api";
+import { useEffect } from "react";
 
 const userTypes = [
   { value: "healthcare_provider", label: "Healthcare Provider" },
@@ -39,6 +41,7 @@ const userTypes = [
 ];
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(1);
@@ -52,6 +55,13 @@ export default function RegisterPage() {
     userType: "",
     hospitalName: "",
   });
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => router.replace("/family-portal"), 800);
+      return () => clearTimeout(timer);
+    }
+  }, [success, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

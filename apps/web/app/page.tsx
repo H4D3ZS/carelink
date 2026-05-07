@@ -141,7 +141,7 @@ export default function Home() {
                     <ChevronRight className="w-5 h-5" />
                   </Button>
                 </Link>
-                <Link href="/demo">
+                <Link href="/scan-qr">
                   <Button size="lg" variant="outline" className="gap-2 text-lg px-8">
                     <QrCode className="w-5 h-5" />
                     Try Demo

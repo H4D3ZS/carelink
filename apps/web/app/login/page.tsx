@@ -21,9 +21,14 @@ import {
   ArrowRight,
   Github,
 } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { authApi, setToken } from "@/lib/api";
+import { useEffect } from "react";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next") || "/family-portal";
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
@@ -32,6 +37,13 @@ export default function LoginPage() {
     email: "",
     password: "",
   });
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => router.replace(next), 800);
+      return () => clearTimeout(timer);
+    }
+  }, [success, router, next]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

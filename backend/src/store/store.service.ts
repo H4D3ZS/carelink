@@ -80,6 +80,34 @@ export class StoreService {
       location: 'Room 302, Cardiac Unit',
       consentEnabled: true,
     },
+    {
+      id: 'p2',
+      name: 'Sarah Chen',
+      status: 'Surgery',
+      location: 'Room 405, Orthopedics',
+      consentEnabled: true,
+    },
+    {
+      id: 'p3',
+      name: 'Robert Wilson',
+      status: 'Critical',
+      location: 'ICU-12, Intensive Care',
+      consentEnabled: false,
+    },
+    {
+      id: 'p4',
+      name: 'Maria Rodriguez',
+      status: 'Recovering',
+      location: 'Room 208, Maternity',
+      consentEnabled: true,
+    },
+    {
+      id: 'p5',
+      name: 'David Kim',
+      status: 'Discharge',
+      location: 'Room 115, General Medicine',
+      consentEnabled: true,
+    },
   ];
 
   private tasks: Task[] = [

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -8,11 +9,9 @@ import {
   QrCode,
   Camera,
   Upload,
-  Scan,
   CheckCircle2,
   Heart,
   Activity,
-  MapPin,
   Clock,
   ArrowLeft,
   Share2,
@@ -294,5 +293,3 @@ export default function ScanQRPage() {
     </div>
   );
 }
-
-import Link from "next/link";
