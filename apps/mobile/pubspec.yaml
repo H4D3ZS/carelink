@@ -12,66 +12,42 @@ dependencies:
 
   # State Management
   flutter_riverpod: ^2.4.0
-  riverpod_annotation: ^2.3.0
 
   # Navigation
   go_router: ^12.0.0
-  go_router_sl: ^3.0.0
-  rxdart: ^0.27.0
 
   # UI Components
-  provider: ^6.1.0
-  flutter_bloc: ^8.1.0
   flutter_svg: ^2.0.0
   cached_network_image: ^3.2.0
   shimmer: ^3.0.0
-  loading_overlay: ^0.7.0
   fluttertoast: ^8.2.2
   cupertino_icons: ^1.0.0
 
   # QR Code
   qr_flutter: ^4.4.0
-  mobile_scanner: ^2.1.0
-  qr_code_scanner: ^1.0.0
-  qr_generator: ^1.0.0
+  mobile_scanner: ^3.5.0
 
   # API & Network
   http: ^1.1.0
   dio: ^5.3.0
-  retrofit: ^4.0.0
-  pretty_dio_logger: ^1.3.0
   connectivity_plus: ^4.0.0
 
   # Authentication
   flutter_secure_storage: ^8.0.0
-  sign_in_with_apple: ^4.3.0
-
-  # Notifications
-  flutter_local_notifications: ^15.0.0
-  flutter_native_splash: ^2.2.0
-  workmanager: ^0.4.0
 
   # Local Storage
-  hive: ^2.2.3
-  hive_flutter: ^1.1.0
   shared_preferences: ^2.1.0
-  sqflite: ^2.2.0
   path_provider: ^2.1.0
 
   # Date & Time
   intl: ^0.18.0
-  fl_chart: ^0.65.0
-  table_calendar: ^3.0.9
 
   # Charts
-  syncfusion_flutter_charts: ^23.1.42
-  graphview: ^1.2.0
+  fl_chart: ^0.65.0
 
   # Utilities
   equatable: ^2.0.5
-  dartz: ^0.10.1
   json_annotation: ^4.8.0
-  meta: ^1.9.0
 
 dev_dependencies:
   flutter_test:
@@ -81,16 +57,6 @@ dev_dependencies:
   # Code Generation
   build_runner: ^2.3.0
   json_serializable: ^6.6.1
-  custom_lint: ^0.4.0
-  retrofit_generator: ^4.0.0
-  riverpod_generator: ^2.3.0
-  freezed_annotation: ^2.4.0
-  injectable_generator: ^2.3.0
-
-  # Testing
-  mockito: ^5.4.3
-  mocktail: ^1.0.0
-  flutter_mobx: ^2.2.0
 
 flutter:
   uses-material-design: true
@@ -98,19 +64,7 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
-    - assets/fonts/
-    - assets/animations/
-
-  fonts:
-    - family: AppFont
-      fonts:
-        - asset: assets/fonts/AppFont-Regular.ttf
-        - asset: assets/fonts/AppFont-Bold.ttf
-          weight: 700
-        - asset: assets/fonts/AppFont-Light.ttf
-          weight: 300
 
 additional_description: |
   A comprehensive mobile application for real-time patient transparency featuring
-  QR code scanning, patient information management, billing tracking, and
-  notification services for families and healthcare providers.
+  QR code scanning and patient information management for families and healthcare providers.
