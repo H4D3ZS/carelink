@@ -30,6 +30,7 @@
     "incremental": true,
     "isolatedModules": true,
     "noImplicitOverride": true,
+    "baseUrl": "./",
     "paths": {
       "@core/*": ["src/core/*"],
       "@modules/*": ["src/modules/*"],
