@@ -4,6 +4,7 @@ import { DemoModule } from './demo/demo.module';
 import { StoreModule } from './store/store.module';
 import { AuthModule } from './auth/auth.module';
 import { PatientController } from './patient/patient.controller';
+import { QRController } from './qr/qr.controller';
 
 // Determine database configuration based on environment
 const isDevelopment = process.env.NODE_ENV !== 'production';
@@ -35,7 +36,7 @@ const useSQLite = process.env.USE_SQLITE === 'true' || (isDevelopment && !proces
           },
     ),
   ],
-  controllers: [PatientController],
+  controllers: [PatientController, QRController],
   providers: [],
 })
 export class AppModule {}

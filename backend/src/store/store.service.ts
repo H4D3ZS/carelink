@@ -186,6 +186,14 @@ export class StoreService {
     return undefined;
   }
 
+  getPatientById(patientId: string): Patient | undefined {
+    return this.patients.find((p) => p.id === patientId);
+  }
+
+  listNotesPublic(patientId: string): Note[] {
+    return this.notes.filter((n) => n.patientId === patientId);
+  }
+
   setConsent(patientId: string, enabled: boolean): Patient | undefined {
     const p = this.patients.find((x) => x.id === patientId);
     if (!p) return undefined;
