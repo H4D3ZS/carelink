@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, Suspense } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
+import { QRScanner } from "@/components/qr/QRScanner";
 import {
   QrCode,
   Camera,
@@ -14,7 +15,6 @@ import {
   Activity,
   Clock,
   ArrowLeft,
-  Share2,
   AlertCircle,
 } from "lucide-react";
 
@@ -41,28 +41,27 @@ interface PatientData {
   }>;
 }
 
-export default function ScanQRPage() {
-  const [scanning, setScanning] = useState(false);
-  const [scanned, setScanned] = useState(false);
+function ScanQRContent() {
+  const [showScanner, setShowScanner] = useState(false);
   const [patientData, setPatientData] = useState<PatientData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const extractPatientIdFromQR = (qrData: string): string | null => {
-    // QR codes contain URLs like: http://localhost:3001/qr/p1
-    // Extract the patient ID from the end
     try {
       const url = new URL(qrData);
       const match = url.pathname.match(/\/qr\/(.+)/);
       return match ? match[1] : null;
     } catch {
-      // If not a valid URL, try to extract directly
       const match = qrData.match(/\/qr\/(.+)/);
       return match ? match[1] : qrData;
     }
   };
 
   const fetchPatientData = async (patientId: string) => {
+    setLoading(true);
+    setError(null);
     try {
       const response = await fetch(`${API_BASE}/qr/${patientId}`);
       if (!response.ok) {
@@ -76,38 +75,50 @@ export default function ScanQRPage() {
       }
       const data = await response.json();
       setPatientData(data);
-      setScanned(true);
     } catch (err: any) {
       setError(err.message || "Failed to load patient data");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleScan = async () => {
-    setScanning(true);
-    setError(null);
-    // Simulate scanning delay, then use demo patient p1
-    setTimeout(async () => {
-      setScanning(false);
-      await fetchPatientData("p1");
-    }, 2000);
+  const handleScanSuccess = async (decodedText: string) => {
+    setShowScanner(false);
+    const patientId = extractPatientIdFromQR(decodedText);
+    if (patientId) {
+      await fetchPatientData(patientId);
+    } else {
+      setError("Invalid QR code format");
+    }
+  };
+
+  const handleScanError = (errorMessage: string) => {
+    setError(errorMessage);
+    setShowScanner(false);
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setScanning(true);
-      setError(null);
-      setTimeout(async () => {
-        setScanning(false);
-        await fetchPatientData("p1");
-      }, 1500);
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      // For file upload, we'll try to use the first demo patient
+      // In production, you'd decode the QR from the image
+      await fetchPatientData("p1");
+    } catch (err: any) {
+      setError(err.message || "Failed to process image");
+    } finally {
+      setLoading(false);
     }
   };
 
   const resetScan = () => {
-    setScanned(false);
-    setScanning(false);
     setPatientData(null);
     setError(null);
+    setShowScanner(false);
   };
 
   const getStatusColor = (status: string) => {
@@ -149,12 +160,11 @@ export default function ScanQRPage() {
     );
   }
 
-  if (scanned && patientData) {
+  if (patientData) {
     const { patient, tasks, notes } = patientData;
     return (
       <div className="min-h-screen bg-slate-50 py-12">
         <div className="max-w-2xl mx-auto px-4">
-          {/* Success Header */}
           <div className="text-center mb-8">
             <div className="w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
               <CheckCircle2 className="w-10 h-10 text-emerald-600" />
@@ -167,7 +177,6 @@ export default function ScanQRPage() {
             </p>
           </div>
 
-          {/* Patient Card */}
           <Card className="mb-6 overflow-hidden">
             <div className="bg-gradient-to-r from-sky-600 to-blue-700 p-6 text-white">
               <div className="flex items-center justify-between">
@@ -181,7 +190,6 @@ export default function ScanQRPage() {
               </div>
             </div>
             <CardContent className="p-6">
-              {/* Tasks Section */}
               <div className="mb-6">
                 <h3 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
                   <Activity className="w-5 h-5 text-sky-500" />
@@ -208,7 +216,6 @@ export default function ScanQRPage() {
                 )}
               </div>
 
-              {/* Notes Section */}
               <div>
                 <h3 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
                   <Clock className="w-5 h-5 text-sky-500" />
@@ -241,7 +248,6 @@ export default function ScanQRPage() {
             </CardContent>
           </Card>
 
-          {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4">
             <Button variant="outline" className="flex-1 gap-2" onClick={resetScan}>
               <ArrowLeft className="w-4 h-4" />
@@ -254,10 +260,6 @@ export default function ScanQRPage() {
               </Link>
             </Button>
           </div>
-
-          <p className="text-center text-sm text-slate-500 mt-6">
-            This is real patient data from the CareLink system.
-          </p>
         </div>
       </div>
     );
@@ -265,7 +267,6 @@ export default function ScanQRPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header */}
       <div className="bg-white border-b border-slate-200">
         <div className="max-w-2xl mx-auto px-4 py-6">
           <Link href="/" className="flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-4">
@@ -278,29 +279,26 @@ export default function ScanQRPage() {
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-12">
-        {/* Scanner Container */}
         <Card className="mb-6">
           <CardContent className="p-8">
             <div className="aspect-square max-w-md mx-auto relative bg-slate-900 rounded-2xl overflow-hidden">
-              {scanning ? (
+              {loading ? (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center text-white">
                     <div className="w-16 h-16 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4" />
-                    <p className="text-lg font-medium">Scanning...</p>
-                    <p className="text-sm text-white/70">Processing QR code</p>
+                    <p className="text-lg font-medium">Loading...</p>
                   </div>
                 </div>
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center text-white/50">
                     <QrCode className="w-24 h-24 mx-auto mb-4" />
-                    <p className="text-lg">Camera preview will appear here</p>
-                    <p className="text-sm">Point your camera at a QR code</p>
+                    <p className="text-lg">QR Scanner</p>
+                    <p className="text-sm">Click the button below to scan</p>
                   </div>
                 </div>
               )}
 
-              {/* Scan Frame Overlay */}
               <div className="absolute inset-0 pointer-events-none">
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48">
                   <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-sky-500" />
@@ -313,16 +311,15 @@ export default function ScanQRPage() {
           </CardContent>
         </Card>
 
-        {/* Action Buttons */}
         <div className="space-y-4">
           <Button
             size="lg"
             className="w-full gap-2"
-            onClick={handleScan}
-            disabled={scanning}
+            onClick={() => setShowScanner(true)}
+            disabled={loading}
           >
             <Camera className="w-5 h-5" />
-            {scanning ? "Scanning..." : "Simulate QR Scan (Demo)"}
+            Open Camera Scanner
           </Button>
 
           <div className="relative">
@@ -338,7 +335,7 @@ export default function ScanQRPage() {
               size="lg"
               className="w-full gap-2"
               onClick={() => fileInputRef.current?.click()}
-              disabled={scanning}
+              disabled={loading}
             >
               <Upload className="w-5 h-5" />
               Upload QR Code Image
@@ -346,21 +343,7 @@ export default function ScanQRPage() {
           </div>
         </div>
 
-        {/* Demo Info */}
         <div className="mt-8 p-6 bg-blue-50 rounded-xl">
-          <h3 className="font-semibold text-slate-900 mb-3">Demo Mode</h3>
-          <p className="text-slate-600 mb-4">
-            For the hackathon demo, click &quot;Simulate QR Scan&quot; to instantly view 
-            John Mitchell&apos;s patient data. In production, this would use your device camera.
-          </p>
-          <div className="flex items-center gap-2 text-sm text-slate-500">
-            <QrCode className="w-4 h-4" />
-            <span>QR Code URL format: <code className="bg-slate-200 px-2 py-1 rounded">/qr/:patientId</code></span>
-          </div>
-        </div>
-
-        {/* Instructions */}
-        <div className="mt-8 p-6 bg-slate-100 rounded-xl">
           <h3 className="font-semibold text-slate-900 mb-3">How QR Access Works</h3>
           <ol className="space-y-2 text-slate-600">
             <li className="flex items-start gap-2">
@@ -382,6 +365,27 @@ export default function ScanQRPage() {
           No app download required. Works on any device with a camera.
         </p>
       </div>
+
+      {showScanner && (
+        <QRScanner
+          onScan={handleScanSuccess}
+          onError={handleScanError}
+          onClose={() => setShowScanner(false)}
+        />
+      )}
     </div>
+  );
+}
+
+export default function ScanQRPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="w-12 h-12 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+        <p className="text-slate-600">Loading...</p>
+      </div>
+    </div>}>
+      <ScanQRContent />
+    </Suspense>
   );
 }

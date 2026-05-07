@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../core/theme.dart';
@@ -12,63 +13,103 @@ class QRScanScreen extends StatefulWidget {
 }
 
 class _QRScanScreenState extends State<QRScanScreen> {
-  bool _isScanning = false;
-  bool _showResult = false;
+  bool _showScanner = true;
+  bool _isLoading = false;
   Map<String, dynamic>? _patientData;
   String? _error;
+  MobileScannerController? _scannerController;
 
-  Future<void> _simulateScan() async {
+  @override
+  void initState() {
+    super.initState();
+    _initScanner();
+  }
+
+  void _initScanner() {
+    _scannerController = MobileScannerController(
+      detectionSpeed: DetectionSpeed.normal,
+      facing: CameraFacing.back,
+      torchEnabled: false,
+    );
+  }
+
+  @override
+  void dispose() {
+    _scannerController?.dispose();
+    super.dispose();
+  }
+
+  String? _extractPatientIdFromQR(String qrData) {
+    try {
+      final uri = Uri.parse(qrData);
+      final match = RegExp(r'/qr/(.+)').firstMatch(uri.path);
+      return match?.group(1);
+    } catch (e) {
+      final match = RegExp(r'/qr/(.+)').firstMatch(qrData);
+      return match?.group(1) ?? qrData;
+    }
+  }
+
+  Future<void> _fetchPatientData(String patientId) async {
     setState(() {
-      _isScanning = true;
+      _isLoading = true;
       _error = null;
+      _showScanner = false;
     });
 
-    // Simulate camera delay
-    await Future.delayed(const Duration(seconds: 2));
-
     try {
-      // Fetch patient p1 via QR endpoint
       final response = await http.get(
-        Uri.parse('${ApiService.apiBaseUrl}/qr/p1'),
+        Uri.parse('${ApiService.apiBaseUrl}/qr/$patientId'),
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {
           _patientData = data;
-          _showResult = true;
-          _isScanning = false;
+          _isLoading = false;
         });
       } else if (response.statusCode == 403) {
         setState(() {
           _error = 'Family access is disabled for this patient';
-          _isScanning = false;
+          _isLoading = false;
         });
       } else if (response.statusCode == 404) {
         setState(() {
           _error = 'Patient not found';
-          _isScanning = false;
+          _isLoading = false;
         });
       } else {
         setState(() {
           _error = 'Failed to load patient data';
-          _isScanning = false;
+          _isLoading = false;
         });
       }
     } catch (e) {
       setState(() {
-        _error = 'Network error. Please try again.';
-        _isScanning = false;
+        _error = 'Network error. Please check your connection.';
+        _isLoading = false;
       });
+    }
+  }
+
+  void _onDetect(BarcodeCapture capture) {
+    final barcode = capture.barcodes.firstOrNull;
+    if (barcode == null || barcode.rawValue == null) return;
+
+    final patientId = _extractPatientIdFromQR(barcode.rawValue!);
+    if (patientId != null) {
+      _scannerController?.stop();
+      _fetchPatientData(patientId);
     }
   }
 
   void _reset() {
     setState(() {
-      _showResult = false;
+      _showScanner = true;
       _patientData = null;
       _error = null;
     });
+    _scannerController?.start();
   }
 
   Color _getStatusColor(String status) {
@@ -83,10 +124,32 @@ class _QRScanScreenState extends State<QRScanScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Scanning...'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+        body: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('Fetching patient data...'),
+            ],
+          ),
+        ),
+      );
+    }
+
     if (_error != null) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('QR Scan'),
+          title: const Text('Error'),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.pop(context),
@@ -123,7 +186,7 @@ class _QRScanScreenState extends State<QRScanScreen> {
                 const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: _reset,
-                  child: const Text('Try Again'),
+                  child: const Text('Scan Again'),
                 ),
               ],
             ),
@@ -132,7 +195,7 @@ class _QRScanScreenState extends State<QRScanScreen> {
       );
     }
 
-    if (_showResult && _patientData != null) {
+    if (_patientData != null) {
       final patient = _patientData!['patient'];
       final tasks = _patientData!['tasks'] as List<dynamic>;
       final notes = _patientData!['notes'] as List<dynamic>;
@@ -358,12 +421,26 @@ class _QRScanScreenState extends State<QRScanScreen> {
                     ],
                   ),
                 )),
+
+              const SizedBox(height: 20),
+
+              // Scan Again Button
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton.icon(
+                  onPressed: _reset,
+                  icon: const Icon(Icons.qr_code_scanner),
+                  label: const Text('Scan Another QR Code'),
+                ),
+              ),
             ],
           ),
         ),
       );
     }
 
+    // QR Scanner View
     return Scaffold(
       appBar: AppBar(
         title: const Text('Scan QR Code'),
@@ -371,197 +448,79 @@ class _QRScanScreenState extends State<QRScanScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          // Torch toggle
+          IconButton(
+            icon: ValueListenableBuilder(
+              valueListenable: _scannerController!.torchState,
+              builder: (context, state, child) {
+                return Icon(
+                  state == TorchState.on
+                      ? Icons.flash_on
+                      : Icons.flash_off,
+                );
+              },
+            ),
+            onPressed: () => _scannerController?.toggleTorch(),
+          ),
+          // Camera switch
+          IconButton(
+            icon: ValueListenableBuilder(
+              valueListenable: _scannerController!.cameraFacingState,
+              builder: (context, state, child) {
+                return Icon(
+                  state == CameraFacing.front
+                      ? Icons.camera_front
+                      : Icons.camera_rear,
+                );
+              },
+            ),
+            onPressed: () => _scannerController?.switchCamera(),
+          ),
+        ],
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Scanner Frame
-              Container(
-                width: 280,
-                height: 280,
+      body: Column(
+        children: [
+          Expanded(
+            child: MobileScanner(
+              controller: _scannerController!,
+              onDetect: _onDetect,
+              overlay: Container(
                 decoration: BoxDecoration(
-                  color: AppTheme.slate900,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    if (_isScanning)
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const SizedBox(
-                            width: 60,
-                            height: 60,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 4,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          Text(
-                            'Scanning...',
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.white.withOpacity(0.8),
-                            ),
-                          ),
-                        ],
-                      )
-                    else
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.qr_code_scanner,
-                            size: 80,
-                            color: Colors.white.withOpacity(0.3),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Camera Preview',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.white.withOpacity(0.5),
-                            ),
-                          ),
-                        ],
-                      ),
-                    // Corner markers
-                    Positioned(
-                      top: 40,
-                      left: 40,
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          border: Border(
-                            top: BorderSide(
-                              color: AppTheme.primaryColor,
-                              width: 4,
-                            ),
-                            left: BorderSide(
-                              color: AppTheme.primaryColor,
-                              width: 4,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      top: 40,
-                      right: 40,
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          border: Border(
-                            top: BorderSide(
-                              color: AppTheme.primaryColor,
-                              width: 4,
-                            ),
-                            right: BorderSide(
-                              color: AppTheme.primaryColor,
-                              width: 4,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 40,
-                      left: 40,
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(
-                              color: AppTheme.primaryColor,
-                              width: 4,
-                            ),
-                            left: BorderSide(
-                              color: AppTheme.primaryColor,
-                              width: 4,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 40,
-                      right: 40,
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(
-                              color: AppTheme.primaryColor,
-                              width: 4,
-                            ),
-                            right: BorderSide(
-                              color: AppTheme.primaryColor,
-                              width: 4,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                  border: Border.all(
+                    color: AppTheme.primaryColor,
+                    width: 4,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
                 ),
               ),
-              const SizedBox(height: 40),
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton.icon(
-                  onPressed: _isScanning ? null : _simulateScan,
-                  icon: const Icon(Icons.camera_alt),
-                  label: Text(_isScanning ? 'Scanning...' : 'Simulate QR Scan'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primaryColor,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(20),
+            color: Colors.black,
+            child: const Column(
+              children: [
+                Text(
+                  'Point camera at QR code',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppTheme.slate100,
-                  borderRadius: BorderRadius.circular(12),
+                SizedBox(height: 8),
+                Text(
+                  'The scanner will automatically detect and decode',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                child: const Column(
-                  children: [
-                    Text(
-                      'Demo Mode',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.slate700,
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      'Tap "Simulate QR Scan" to instantly view John Mitchell\'s patient data.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: AppTheme.slate600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
