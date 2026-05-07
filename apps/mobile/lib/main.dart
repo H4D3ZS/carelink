@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'core/theme.dart';
 import 'screens/login_screen.dart';
-import 'screens/patients_screen.dart';
+import 'screens/main_screen.dart';
 import 'data/api_service.dart';
 
 void main() {
@@ -43,7 +43,7 @@ class _SplashScreenState extends State<SplashScreen> {
     if (mounted) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (_) => token != null ? const PatientsScreen() : const LoginScreen(),
+          builder: (_) => token != null ? const MainScreen() : const LoginScreen(),
         ),
       );
     }
@@ -53,14 +53,11 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              AppTheme.primaryColor,
-              AppTheme.secondaryColor,
-            ],
+            colors: [AppTheme.primaryColor, AppTheme.secondaryColor],
           ),
         ),
         child: Center(

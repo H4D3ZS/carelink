@@ -65,6 +65,22 @@ class ApiService {
     }
   }
 
+  static Future<Map<String, dynamic>> getMe() async {
+    final token = await getToken();
+    final response = await http.get(
+      Uri.parse('$apiBaseUrl/auth/me'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    ).timeout(const Duration(seconds: 15));
+    
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    }
+    throw Exception('Failed to get user info');
+  }
+
   static Future<List<dynamic>> getPatients() async {
     final token = await getToken();
     final response = await http.get(
@@ -113,6 +129,39 @@ class ApiService {
     throw Exception('Failed to load tasks');
   }
 
+  static Future<dynamic> addTask(String patientId, String title) async {
+    final token = await getToken();
+    final response = await http.post(
+      Uri.parse('$apiBaseUrl/patients/$patientId/tasks'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({'title': title}),
+    ).timeout(const Duration(seconds: 15));
+    
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      return jsonDecode(response.body);
+    }
+    throw Exception('Failed to add task');
+  }
+
+  static Future<dynamic> toggleTask(String patientId, String taskId) async {
+    final token = await getToken();
+    final response = await http.patch(
+      Uri.parse('$apiBaseUrl/patients/$patientId/tasks/$taskId/toggle'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    ).timeout(const Duration(seconds: 15));
+    
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    }
+    throw Exception('Failed to toggle task');
+  }
+
   static Future<List<dynamic>> getNotes(String patientId) async {
     final token = await getToken();
     final response = await http.get(
@@ -127,6 +176,40 @@ class ApiService {
       return jsonDecode(response.body);
     }
     throw Exception('Failed to load notes');
+  }
+
+  static Future<dynamic> addNote(String patientId, String text, String audience) async {
+    final token = await getToken();
+    final response = await http.post(
+      Uri.parse('$apiBaseUrl/patients/$patientId/notes'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({'text': text, 'audience': audience}),
+    ).timeout(const Duration(seconds: 15));
+    
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      return jsonDecode(response.body);
+    }
+    throw Exception('Failed to add note');
+  }
+
+  static Future<dynamic> setConsent(String patientId, bool enabled) async {
+    final token = await getToken();
+    final response = await http.post(
+      Uri.parse('$apiBaseUrl/patients/$patientId/consent'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({'enabled': enabled}),
+    ).timeout(const Duration(seconds: 15));
+    
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    }
+    throw Exception('Failed to update consent');
   }
 
   // Public QR endpoint - no auth required

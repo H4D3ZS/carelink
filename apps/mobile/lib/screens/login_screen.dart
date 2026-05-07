@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/theme.dart';
 import '../data/api_service.dart';
-import 'patients_screen.dart';
+import 'main_screen.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -41,7 +41,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       if (mounted) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const PatientsScreen()),
+          MaterialPageRoute(builder: (_) => const MainScreen()),
         );
       }
     } catch (e) {
