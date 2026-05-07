@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Headers, Post, UnauthorizedException } from '@nestjs/common';
-import { StoreService, Role, User } from '../store/store.service';
+import { StoreService, Role } from '../store/store.service';
 
 function getToken(headers: Record<string, string | string[] | undefined>): string | undefined {
   const auth = headers['authorization'] || headers['Authorization'];
