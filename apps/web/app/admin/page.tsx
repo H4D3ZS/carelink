@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
@@ -66,7 +66,7 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -80,7 +80,7 @@ export default function AdminDashboardPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (!getToken()) {
@@ -90,7 +90,7 @@ export default function AdminDashboardPage() {
       return;
     }
     load();
-  }, [router]);
+  }, [router, load]);
 
   const onSelectPatient = async (id: string) => {
     setSelectedId(id);
