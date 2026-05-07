@@ -397,12 +397,12 @@ export default function AdminDashboardPage() {
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <p className="text-sm text-slate-600">Generate QR codes for patients to share with family.</p>
-                  <Button variant="outline" className="gap-2" asChild>
-                    <Link href="/scan-qr">
+                  <Link href="/scan-qr" className="inline-flex">
+                    <Button variant="outline" className="gap-2">
                       <QrCode className="w-4 h-4" />
                       Scan QR
-                    </Link>
-                  </Button>
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
             </div>
