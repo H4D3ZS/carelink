@@ -12,6 +12,7 @@ interface ApiError {
   code: string;
   message: string;
   details?: Record<string, unknown>;
+  [key: string]: unknown;
 }
 
 // API Response Helper
@@ -25,7 +26,7 @@ export class ApiResponse {
     };
   }
 
-  static error<T>(message: string, code?: string, details?: Record<string, unknown>, statusCode: number = 500): ApiResult<T> {
+  static error<T>(message: string, code?: string, details?: Record<string, unknown> | ApiError, statusCode: number = 500): ApiResult<T> {
     return {
       success: false,
       data: null as T,
@@ -33,7 +34,7 @@ export class ApiResponse {
       error: {
         code: code || 'API_ERROR',
         message,
-        details,
+        details: details as Record<string, unknown> | undefined,
       },
     };
   }
