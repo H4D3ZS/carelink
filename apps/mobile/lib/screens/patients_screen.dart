@@ -3,6 +3,7 @@ import '../core/theme.dart';
 import '../data/api_service.dart';
 import 'login_screen.dart';
 import 'patient_detail_screen.dart';
+import 'qr_scan_screen.dart';
 
 class PatientsScreen extends StatefulWidget {
   const PatientsScreen({super.key});
@@ -118,59 +119,9 @@ class _PatientsScreenState extends State<PatientsScreen> {
                     ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // QR Scan simulation
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('Scan QR Code'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 200,
-                    height: 200,
-                    decoration: BoxDecoration(
-                      color: AppTheme.slate900,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Center(
-                      child: Icon(
-                        Icons.qr_code_scanner,
-                        size: 80,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Simulate scanning a patient QR code',
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancel'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    // Navigate to first patient as demo
-                    if (_patients.isNotEmpty) {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => PatientDetailScreen(
-                            patientId: _patients[0]['id'],
-                            patientName: _patients[0]['name'],
-                          ),
-                        ),
-                      );
-                    }
-                  },
-                  child: const Text('Simulate Scan'),
-                ),
-              ],
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => const QRScanScreen(),
             ),
           );
         },
