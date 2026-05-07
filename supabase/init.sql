@@ -193,10 +193,10 @@ CREATE TRIGGER update_notes_updated_at BEFORE UPDATE ON notes
 -- ============================================
 INSERT INTO users (id, email, password, role, patient_ids) VALUES
   ('550e8400-e29b-41d4-a716-446655440000', 'admin@carelink.demo', 'admin', 'admin', '{}'),
-  ('550e8400-e29b-41d4-a716-446655440001', 'staff@carelink.demo', 'staff', '{}'),
-  ('550e8400-e29b-41d4-a716-446655440002', 'nurse@carelink.demo', 'staff', '{}'),
-  ('550e8400-e29b-41d4-a716-446655440003', 'family@carelink.demo', 'family', '{"550e8400-e29b-41d4-a716-446655440100"}'),
-  ('550e8400-e29b-41d4-a716-446655440004', 'family2@carelink.demo', 'family', '{"550e8400-e29b-41d4-a716-446655440101"}')
+  ('550e8400-e29b-41d4-a716-446655440001', 'staff@carelink.demo', 'staff', 'staff', '{}'),
+  ('550e8400-e29b-41d4-a716-446655440002', 'nurse@carelink.demo', 'staff', 'staff', '{}'),
+  ('550e8400-e29b-41d4-a716-446655440003', 'family@carelink.demo', 'family', 'family', '{"550e8400-e29b-41d4-a716-446655440100"}'),
+  ('550e8400-e29b-41d4-a716-446655440004', 'family2@carelink.demo', 'family', 'family', '{"550e8400-e29b-41d4-a716-446655440101"}')
 ON CONFLICT (email) DO NOTHING;
 
 -- ============================================
