@@ -45,10 +45,23 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } catch (e) {
-      setState(() => _error = e.toString());
+      // Clean up error message for display
+      String errorMsg = e.toString();
+      if (errorMsg.contains('SocketException') || errorMsg.contains('Connection refused')) {
+        errorMsg = 'Cannot connect to server. Please check your internet connection.';
+      } else if (errorMsg.contains('Exception:')) {
+        errorMsg = errorMsg.replaceAll('Exception: ', '');
+      }
+      setState(() => _error = errorMsg);
     } finally {
       setState(() => _isLoading = false);
     }
+  }
+
+  void _fillDemoAccount(String email, String password) {
+    _emailController.text = email;
+    _passwordController.text = password;
+    setState(() {});
   }
 
   @override
@@ -69,6 +82,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     colors: [AppTheme.primaryColor, AppTheme.secondaryColor],
                   ),
                   borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.primaryColor.withOpacity(0.3),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
                 ),
                 child: const Icon(
                   Icons.favorite,
@@ -140,11 +160,30 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     if (_error != null) ...[
                       const SizedBox(height: 16),
-                      Text(
-                        _error!,
-                        style: const TextStyle(
-                          color: AppTheme.dangerColor,
-                          fontSize: 14,
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppTheme.dangerColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.error_outline,
+                              color: AppTheme.dangerColor,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                _error!,
+                                style: const TextStyle(
+                                  color: AppTheme.dangerColor,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -177,23 +216,41 @@ class _LoginScreenState extends State<LoginScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppTheme.slate100,
+                  color: AppTheme.slate50,
                   borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppTheme.slate200),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Demo Accounts:',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.slate700,
-                      ),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          size: 16,
+                          color: AppTheme.primaryColor,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Demo Accounts (Tap to fill)',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.slate700,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 8),
-                    _buildDemoAccount('admin@carelink.demo', 'admin', 'Admin'),
-                    _buildDemoAccount('staff@carelink.demo', 'staff', 'Staff'),
-                    _buildDemoAccount('family@carelink.demo', 'family', 'Family'),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _buildDemoChip('admin@carelink.demo', 'admin', 'Admin'),
+                        _buildDemoChip('staff@carelink.demo', 'staff', 'Staff'),
+                        _buildDemoChip('family@carelink.demo', 'family', 'Family'),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -225,32 +282,24 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildDemoAccount(String email, String password, String role) {
-    return InkWell(
-      onTap: () {
-        _emailController.text = email;
-        _passwordController.text = password;
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Row(
-          children: [
-            Icon(
-              Icons.copy,
-              size: 16,
-              color: AppTheme.primaryColor.withOpacity(0.6),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              '$email ($role)',
-              style: const TextStyle(
-                fontSize: 12,
-                color: AppTheme.slate600,
-              ),
-            ),
-          ],
-        ),
+  Widget _buildDemoChip(String email, String password, String role) {
+    final isSelected = _emailController.text == email;
+    return ActionChip(
+      avatar: Icon(
+        isSelected ? Icons.check_circle : Icons.account_circle_outlined,
+        size: 18,
+        color: isSelected ? Colors.white : AppTheme.primaryColor,
       ),
+      label: Text('$role'),
+      labelStyle: TextStyle(
+        fontSize: 12,
+        color: isSelected ? Colors.white : AppTheme.slate700,
+      ),
+      backgroundColor: isSelected ? AppTheme.primaryColor : Colors.white,
+      side: BorderSide(
+        color: isSelected ? AppTheme.primaryColor : AppTheme.slate200,
+      ),
+      onPressed: () => _fillDemoAccount(email, password),
     );
   }
 }
