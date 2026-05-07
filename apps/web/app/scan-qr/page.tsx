@@ -149,11 +149,11 @@ function ScanQRContent() {
               <ArrowLeft className="w-4 h-4" />
               Try Again
             </Button>
-            <Button className="gap-2" asChild>
-              <Link href="/login">
+            <Link href="/login" className="inline-flex">
+              <Button className="gap-2">
                 Sign In for Full Access
-              </Link>
-            </Button>
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
@@ -253,12 +253,12 @@ function ScanQRContent() {
               <ArrowLeft className="w-4 h-4" />
               Scan Another Code
             </Button>
-            <Button className="flex-1 gap-2" asChild>
-              <Link href="/family-portal">
+            <Link href="/family-portal" className="inline-flex flex-1">
+              <Button className="flex-1 gap-2">
                 <Heart className="w-4 h-4" />
                 Family Portal
-              </Link>
-            </Button>
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
