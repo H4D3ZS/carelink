@@ -65,7 +65,7 @@ dependencies:
 
   # Charts
   syncfusion_flutter_charts: ^23.1.42
-  graphview: ^2.0.0
+  graphview: ^1.2.0
 
   # Utilities
   equatable: ^2.0.5
