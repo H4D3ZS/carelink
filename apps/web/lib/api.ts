@@ -13,7 +13,13 @@ export type Task = { id: string; patientId: string; title: string; status: "open
 export type Note = { id: string; patientId: string; author: string; audience: "family" | "staff"; text: string; createdAt: string };
 export type Encounter = { id: string; patientId: string; type: string; status: string; start: string; end?: string; assignee?: string };
 
-const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+// API Base URL - uses environment variable in production, localhost in development
+const BASE = typeof window !== 'undefined' 
+  ? (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001")
+  : (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001");
+
+// Ensure no trailing slash
+const API_BASE = BASE.replace(/\/$/, '');
 
 const tokenKey = "carelink_token";
 export function setToken(token: string) {
@@ -31,7 +37,7 @@ async function api<T>(path: string, init?: RequestInit): Promise<T> {
   const token = getToken();
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await fetch(`${BASE}${path}`, {
+  const res = await fetch(`${API_BASE}${path}`, {
     headers,
     cache: "no-store",
     ...init,
